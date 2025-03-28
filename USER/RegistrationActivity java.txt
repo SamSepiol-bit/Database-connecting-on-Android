@@ -1,0 +1,91 @@
+package com.example.user;
+
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.regex.Pattern;
+
+public class RegistrationActivity extends AppCompatActivity {
+
+    private EditText editTextUsername;
+    private EditText editTextPassword;
+    private EditText editTextConfirmPassword;
+    private EditText editTextEmail;
+    private Button buttonRegister;
+    private TextView textViewError;
+
+    private DatabaseHelper dbHelper;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_registration);
+
+        // Initialize the DatabaseHelper
+        dbHelper = new DatabaseHelper(this);
+
+        //Referencing the UI elements(Views)
+        editTextUsername = findViewById(R.id.editTextUsername);
+        editTextPassword = findViewById(R.id.editTextPassword);
+        editTextConfirmPassword = findViewById(R.id.editTextConfirmPassword);
+        editTextEmail = findViewById(R.id.editTextEmail);
+        buttonRegister = findViewById(R.id.buttonRegister);
+        textViewError = findViewById(R.id.textViewError);
+
+        //Button onClickListener to specify what should happen when the Register button gets clicked
+        buttonRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Get user input
+                String username = editTextUsername.getText().toString();
+                String password = editTextPassword.getText().toString();
+                String confirmPassword = editTextConfirmPassword.getText().toString();
+                String email = editTextEmail.getText().toString();
+
+                // Simple input validation
+                //Checking if the user has entered values for all the input fields
+                if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || email.isEmpty()) {
+                    textViewError.setText("Please fill in all fields.");
+                } else if (!password.equals(confirmPassword)) { //Checking if the user entered values in Password input field & Confirm Password input filed match
+                    textViewError.setText("Passwords do not match.");
+                } else if (!isValidEmail(email)) {//Cheking if the user has entered a proper email, to check this Email format checking regular expression is used
+                    textViewError.setText("Invalid email address.");
+                } else {
+                    // Open the database for writing
+                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+                    // Prepare user data for insertion
+                    ContentValues values = new ContentValues();
+                    values.put("username", username);
+                    values.put("password", password); // You should hash the password in practice
+                    values.put("email", email);
+
+                    // Insert user data into the database
+                    long newRowId = db.insert("users", null, values);
+
+                    // Close the database
+                    dbHelper.close();
+
+                    if (newRowId != -1) {
+                        Toast.makeText(RegistrationActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                        finish(); // Finish the activity and return to the previous screen
+                    } else {
+                        textViewError.setText("Registration failed.");
+                    }
+                }
+            }
+        });
+    }
+
+    // Function to validate email format using a regular expression
+    private boolean isValidEmail(String email) {
+        String emailPattern = "^[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+$";
+        return Pattern.matches(emailPattern, email);
+    }
+}

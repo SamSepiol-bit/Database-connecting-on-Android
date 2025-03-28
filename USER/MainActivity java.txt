@@ -1,0 +1,27 @@
+package com.example.user;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+    //When the Login button clicked LoginActivity will be launched using the intent
+    //To do this in this example we're not creating a onClickListener like before. By adding the onClick attribute in XML we can lessen the codes this way.
+    public void onLoginClick(View view) {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+    }
+    //When the Registration button clicked RegistrationActivity will be launched using the intent
+    public void onRegisterClick(View view) {
+        Intent intent = new Intent(this, RegistrationActivity.class);
+        startActivity(intent);
+    }
+}
